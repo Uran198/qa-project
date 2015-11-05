@@ -27,4 +27,14 @@ urlpatterns = [
         views.QuestionDetailView.as_view(),
         name='details',
         ),
+
+    url(r'^api/$',
+        views.QueestionListCreateAPIView.as_view(),
+        name='api'
+        ),
+
+    url(r'^api/(?P<pk>[0-9]+)$',
+        views.QuestionRetrieveUpdateDestroyAPIView.as_view(),
+        name='api'
+        ),
 ]

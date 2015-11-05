@@ -4,8 +4,12 @@ from django.views.generic import CreateView, UpdateView, DetailView, DeleteView
 from django.views.generic import ListView
 from django.core.urlresolvers import reverse_lazy
 
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+
 from .models import Question, Answer
 from .forms import AnswerForm
+from .serializers import QuestionSerializer
 
 
 class QuestionListView(ListView):
@@ -50,4 +54,11 @@ class QuestionDetailView(DetailView):
         return self.render_to_response(context)
 
 
-# Create your views here.
+class QueestionListCreateAPIView(ListCreateAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+
+
+class QuestionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
