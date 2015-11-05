@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+	{% block title %}
+	Simple question app
+	{% endblock title %}
+</title>
+</head>
+<body>
+	<div class='nav'>
+		<a href="{% url 'questions:list' %}">List of questions</a>
+		<a href="{% url 'questions:create' %}">Create question</a>
+	</div>
+	{% block body %}
+	{% endblock body %}
+</body>
+</html>

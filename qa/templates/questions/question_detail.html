@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+
+<h1>{{ question.title }}</h1>
+<p>{{ question.details }}</p>
+<a href="{% url 'questions:update' question.pk %}"> Update</a>
+<br/>
+<br/>
+<form action="{% url 'questions:delete' question.pk %}" method="POST">
+	{% csrf_token %}
+	<input type="submit" value="Delete"/>
+</form>
+
+<h2>Answers</h2>
+
+<ul>
+{% for answer in answers %}
+<li>{{ answer.text }} </li>
+{% endfor %}
+</ul>
+
+<h3>Add your answer</h3>
+
+<form action="" method="POST">
+{% csrf_token %}
+{{ answer_form.as_p }}
+<input type='submit' value='Add answer'/>
+</form>
+
+
+{% endblock body %}
