@@ -1,0 +1,125 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>React Tutorial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.2/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.2/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script type="text/babel">
+      // To get started with this tutorial running your own code, simply remove
+      // the script tag loading scripts/example.js and start writing code here.
+
+var Question = React.createClass({
+  render: function() {
+    return (
+      <div className="question">
+        <h2 className="questionAuthor">
+	  {this.props.author}
+	</h2>
+	{this.props.children}
+      </div>
+    );
+  }
+});
+
+var QuestionList = React.createClass({
+  render: function() {
+    var questionNodes = this.props.data.map(function(question) {
+	return (
+	  <Question author={question.title}>
+	    {question.details}
+	  </Question>
+	);
+    });
+    return (
+      <div className="questionList">
+	{questionNodes}
+      </div>
+    );
+  }
+});
+
+var QuestionForm = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var title = this.refs.title.value.trim();
+    var details = this.refs.details.value.trim();
+    if (!title) {
+      return;
+    }
+    this.props.onQuestionSubmit({title: title, details: details});
+    this.refs.title.value = "";
+    this.refs.details.value = "";
+    return;
+  },
+  render: function() {
+    return (
+      <form className="questionForm" onSubmit={this.handleSubmit}>
+	<input type="text" placeholder="Title" ref="title"/>
+	<input type="text" placeholder="Details" ref="details"/>
+	<input type="submit" value="Post"/>
+      </form>
+    );
+  }
+});
+
+var QuestionBox = React.createClass({
+  loadQuestionsFromServer: function() {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: 'false',
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  handleQuestionSubmit: function(question) {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      type: 'POST',
+      data: question,
+      success: function(data) {
+        //this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  getInitialState: function() {
+    return {data: []}
+  },
+  componentDidMount: function() {
+    this.loadQuestionsFromServer();
+    setInterval(this.loadQuestionsFromServer, this.props.pollInterval);
+  },
+  render: function() {
+    return (
+      <div className="QuestionBox">
+	<h1>Questions</h1>
+	<QuestionList data={this.state.data}/>
+	<QuestionForm onQuestionSubmit={this.handleQuestionSubmit} />
+      </div>
+    );
+  }
+});
+
+ReactDOM.render(
+  <QuestionBox url="/questions/api/" pollInterval={2000}/> ,
+  document.getElementById('content')
+);
+
+    </script>
+  </body>
+</html>

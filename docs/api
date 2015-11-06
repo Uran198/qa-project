@@ -1,0 +1,7 @@
+     path             method      data			 description                     response
+
+/questions/api         GET				 Get List of questions       [{'title':, 'details':}]
+/questions/api         POST     {'title':, 'details':}   Create new question          {'title':, 'details':}
+/questions/api/[0-9]+  GET				 Get question details         {'title':, 'details':}
+/questions/api/[0-9]+  PUT	{'title':, 'details':}   Change question              {'title':, 'details':}
+/questions/api/[0-9]+  DELETE	                         Delete question

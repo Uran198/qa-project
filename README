@@ -1,0 +1,12 @@
+Installation and Running Guide
+
+1. Install pip
+2. run from the command line in project directory:
+	pip install -r requirements.txt
+3. to run server:
+	cd qa
+	./manage.py runserver
+
+
+There is an example of api usage using react and Jquery in qa/templates/index.html
+Docs on api: /docs/api
