@@ -23,7 +23,7 @@ urlpatterns = [
         name='delete',
         ),
 
-    url(r'^(?P<pk>[0-9]+)/(?P<slug>[a-z-]+)$',
+    url(r'^(?P<pk>[0-9]+)/(?P<slug>[-\w]+)$',
         views.QuestionDetailView.as_view(),
         name='details',
         ),
