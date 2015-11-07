@@ -29,7 +29,7 @@ urlpatterns = [
         ),
 
     url(r'^api/$',
-        views.QueestionListCreateAPIView.as_view(),
+        views.QuestionListCreateAPIView.as_view(),
         name='api'
         ),
 

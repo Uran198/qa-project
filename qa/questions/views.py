@@ -3,9 +3,12 @@ from django.shortcuts import redirect
 from django.views.generic import CreateView, UpdateView, DetailView, DeleteView
 from django.views.generic import ListView
 from django.core.urlresolvers import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .models import Question, Answer
 from .forms import AnswerForm
@@ -20,16 +23,28 @@ class QuestionCreateView(CreateView):
     model = Question
     fields = ("title", "details")
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(QuestionCreateView, self).dispatch(*args, **kwargs)
+
 
 class QuestionUpdateView(UpdateView):
     model = Question
     template_name_suffix = '_update_form'
     fields = ("title", "details")
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(QuestionUpdateView, self).dispatch(*args, **kwargs)
+
 
 class QuestionDeleteView(DeleteView):
     model = Question
     success_url = reverse_lazy('questions:list')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(QuestionDeleteView, self).dispatch(*args, **kwargs)
 
 
 class QuestionDetailView(DetailView):
@@ -41,6 +56,7 @@ class QuestionDetailView(DetailView):
         context['answer_form'] = AnswerForm()
         return context
 
+    @method_decorator(login_required)
     def post(self, request, pk, **kwargs):
         form = AnswerForm(request.POST)
         self.object = self.get_object()
@@ -54,11 +70,13 @@ class QuestionDetailView(DetailView):
         return self.render_to_response(context)
 
 
-class QueestionListCreateAPIView(ListCreateAPIView):
+class QuestionListCreateAPIView(ListCreateAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class QuestionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)

@@ -3,14 +3,21 @@
 <head>
 <title>
 	{% block title %}
-	Simple question app
+	{% block head_title %}{% endblock head_title %}
+	| Simple question app |
 	{% endblock title %}
 </title>
 </head>
 <body>
 	<div class='nav'>
-		<a href="{% url 'questions:list' %}">List of questions</a>
-		<a href="{% url 'questions:create' %}">Create question</a>
+		{% if user.is_authenticated %}
+			<a href="{% url 'questions:list' %}">List of questions</a>
+			<a href="{% url 'questions:create' %}">Create question</a>
+			<a href="{% url 'account_logout' %}">Log out</a>
+		{% else %}
+			<a href="{% url 'account_login' %}">Log in</a>
+			<a href="{% url 'account_signup' %}">Sign up</a>
+		{% endif %}
 	</div>
 	{% block content %}
 	{% endblock content %}
