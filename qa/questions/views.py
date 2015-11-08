@@ -9,10 +9,12 @@ from django.contrib.auth.decorators import login_required
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import ValidationError
 
 from .models import Question, Answer
 from .forms import AnswerForm
 from .serializers import QuestionSerializer
+from .decorators import owner_required
 
 
 class QuestionListView(ListView):
@@ -22,6 +24,10 @@ class QuestionListView(ListView):
 class QuestionCreateView(CreateView):
     model = Question
     fields = ("title", "details")
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super(QuestionCreateView, self).form_valid(form)
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -34,6 +40,7 @@ class QuestionUpdateView(UpdateView):
     fields = ("title", "details")
 
     @method_decorator(login_required)
+    @method_decorator(owner_required)
     def dispatch(self, *args, **kwargs):
         return super(QuestionUpdateView, self).dispatch(*args, **kwargs)
 
@@ -43,6 +50,7 @@ class QuestionDeleteView(DeleteView):
     success_url = reverse_lazy('questions:list')
 
     @method_decorator(login_required)
+    @method_decorator(owner_required)
     def dispatch(self, *args, **kwargs):
         return super(QuestionDeleteView, self).dispatch(*args, **kwargs)
 
@@ -62,6 +70,7 @@ class QuestionDetailView(DetailView):
         self.object = self.get_object()
         if form.is_valid():
             answer = Answer(text=form.cleaned_data['text'])
+            answer.owner = request.user
             answer.question = self.object
             answer.save()
             return redirect(answer.question)
@@ -75,8 +84,23 @@ class QuestionListCreateAPIView(ListCreateAPIView):
     serializer_class = QuestionSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class QuestionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        if instance.owner != self.request.user:
+            raise ValidationError("You can update only your own questions")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.owner != self.request.user:
+            raise ValidationError("You can destroy only your own questions")
+        return super(QuestionRetrieveUpdateDestroyAPIView,
+                     self).perform_destroy(instance)
