@@ -7,7 +7,7 @@
 <p>{{ question.details }}</p>
 <p>Owner: {{ question.owner }}</p>
 
-{% if user.is_authenticated %}
+{% if user == question.owner %}
 
 <a href="{% url 'questions:update' question.pk %}"> Update</a>
 <br/>
