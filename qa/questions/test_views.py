@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
 # from .views import QuestionDetailView
-from .models import Question
+from .models import Question, Comment
 
 
 class QuestionViewsTest(TestCase):
@@ -24,6 +24,11 @@ class QuestionViewsTest(TestCase):
         self.answer = self.question.answer_set.create(
             text="Yes, I am.",
             owner=self.user,
+        )
+        self.comment = Comment.objects.create(
+            text="This is it",
+            owner=self.user,
+            content_object=self.question,
         )
         self.question_url = self.question.get_absolute_url()
 
@@ -121,10 +126,97 @@ class QuestionViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Question.objects.get(pk=1).title, 'new_title')
 
-    def test_question_update_post_not_logged_in(self):
-        url = '/questions/1/update/'
-        response = self.client.post(url, {'title': "new_title"})
-        self.assertEqual(response.status_code, 302)
+    def test_add_question_comment_logged_in(self):
+        self.client.login(username=self.user.username,
+                          password=self.user_password)
+        url = '/questions/comments/1/create/'
+        response = self.client.post(url, {'text': 'comment'}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'comment')
+
+    def test_add_question_comment_not_logged_in(self):
+        url = '/questions/comments/1/create/'
+        response = self.client.post(url, {'text': 'comment'})
+        self.assertRedirects(response,
+                             ''.join(['/accounts/login/?next=', url]))
+
+    def test_add_answer_comment_logged_in(self):
+        self.client.login(username=self.user.username,
+                          password=self.user_password)
+        url = '/questions/comments/answers/1/create/'
+        response = self.client.post(url, {'text': 'comment'}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'comment')
+
+    def test_add_answer_comment_logged_not_in(self):
+        url = '/questions/comments/answers/1/create/'
+        response = self.client.post(url, {'text': 'comment'})
+        self.assertRedirects(response,
+                             ''.join(['/accounts/login/?next=', url]))
+
+    def test_update_comment_not_logged_in(self):
+        url = '/questions/comments/update/1/'
+        response = self.client.post(url, {'text': 'new_comment'})
+        self.assertRedirects(response,
+                             ''.join(['/accounts/login/?next=', url]))
+
+    def test_update_comment_logged_in_not_as_owner(self):
+        self.client.login(username=self.another_username,
+                          password=self.user_password)
+        url = '/questions/comments/update/1/'
+        response = self.client.post(url, {'text': 'new_comment'})
+        self.assertEqual(response.status_code, 403)
+        self.assertNotEqual(self.question.comments.all()[0].text,
+                            'new_comment')
+
+    def test_update_comment_logged_in_as_owner(self):
+        self.client.login(username=self.user.username,
+                          password=self.user_password)
+        url = '/questions/comments/update/1/'
+        response = self.client.post(url, {'text': 'new_comment'})
+        self.assertRedirects(response, self.question_url)
+        self.assertEqual(self.question.comments.all()[0].text, 'new_comment')
+
+    def test_update_comment_get(self):
+        self.client.login(username=self.user.username,
+                          password=self.user_password)
+        url = '/questions/comments/update/1/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_create_comment_get(self):
+        url = '/questions/comments/1/create/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_comment_not_logged_in(self):
+        url = '/questions/comments/delete/1/'
+        response = self.client.post(url, {'text': 'new_comment'})
+        self.assertRedirects(response,
+                             ''.join(['/accounts/login/?next=', url]))
+
+    def test_delete_comment_logged_in_not_as_owner(self):
+        self.client.login(username=self.another_username,
+                          password=self.user_password)
+        url = '/questions/comments/delete/1/'
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(len(self.question.comments.all()), 1)
+
+    def test_delete_comment_logged_in_as_owner(self):
+        self.client.login(username=self.user.username,
+                          password=self.user_password)
+        url = '/questions/comments/delete/1/'
+        response = self.client.post(url)
+        self.assertRedirects(response, self.question_url)
+        self.assertEqual(len(self.question.comments.all()), 0)
+
+    def test_delete_comment_get(self):
+        self.client.login(username=self.user.username,
+                          password=self.user_password)
+        url = '/questions/comments/delete/1/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 405)
 
 
 class QuestionAPITest(TestCase):

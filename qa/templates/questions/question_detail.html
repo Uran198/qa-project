@@ -4,6 +4,7 @@
 
 
 <h1>{{ question.title }}</h1>
+<h2>Current url {{ request.path }}</h2>
 <p>{{ question.details }}</p>
 <p>Owner: {{ question.owner }}</p>
 
@@ -18,12 +19,61 @@
 </form>
 
 {% endif %}
+<ul>
+{% for comment in comments %}
+<li>
+	{{ comment }} :-- {{ comment.owner }}
+	{% if user == comment.owner %}
+	<form action="{% url 'questions:delete_comment' comment.pk %}" method="POST">
+		{% csrf_token %}
+		<input type="submit" value="delete" />
+	</form>
+	{% endif %}
+</li>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<li>
+	{# BAD HARDcODED FORM #}
+	<form action="{% url 'questions:add_question_comment' question.pk %}" method="POST">
+		{% csrf_token %}
+		<input type="textarea" name="text"/>
+		<input type="submit" value="Add comment"/>
+	</form>
+</li>
+{% endif %}
+</ul>
 
 <h2>Answers</h2>
 
 <ul>
 {% for answer in answers %}
 <li>{{ answer.text }} </li>
+<ul>
+{% for comment in answer.comments.all %}
+<li>
+	{{ comment }} :-- {{ comment.owner }}
+	{% if user == comment.owner %}
+	<form action="{% url 'questions:delete_comment' comment.pk %}" method="POST">
+		{% csrf_token %}
+		<input type="submit" value="delete" />
+	</form>
+	{% endif %}
+</li>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<li>
+	{# BAD HARDcODED FORM #}
+	<form action="{% url 'questions:add_answer_comment' answer.pk %}" method="POST">
+		{% csrf_token %}
+		<input type="textarea" name="text"/>
+		<input type="submit" value="Add comment"/>
+	</form>
+</li>
+{% endif %}
+</ul>
+
 {% endfor %}
 </ul>
 
