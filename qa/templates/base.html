@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>
 	{% block title %}
@@ -7,17 +7,52 @@
 	| Simple question app |
 	{% endblock title %}
 </title>
+
+	{% block css %}
+	<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
+	{% endblock css %}
+
+	{% block js %}
+	<!-- Latest JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>
+	{% endblock js %}
+
 </head>
 <body>
-	<div class='nav'>
-		{% if user.is_authenticated %}
-			<a href="{% url 'questions:list' %}">List of questions</a>
-			<a href="{% url 'questions:create' %}">Create question</a>
-			<a href="{% url 'account_logout' %}">Log out</a>
-		{% else %}
-			<a href="{% url 'account_login' %}">Log in</a>
-			<a href="{% url 'account_signup' %}">Sign up</a>
-		{% endif %}
+	<div class="conteiner">
+		<nav class="navbar navbar-dark navbar-static-top bg-inverse">
+			<div class="conteiner">
+				<a class="navbar-brand" href="{% url 'questions:list' %}">Questions app</a>
+				<button type="button" class="navbar-toggler hidden-sm-up pull-right" data-toggle="collapse" data-target="#bs-navbar-collapse-1">
+				&#9776;
+				</button>
+				<div class="collapse navbar-toggleable-xs" id="bs-navbar-collapse-1">
+					<ul class="nav navbar-nav pull-right">
+						{% if user.is_authenticated %}
+						<li class="nav-item">
+							<a class="nav-link" href="{% url 'questions:list' %}">List of questions</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="{% url 'questions:create' %}">Create question</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="{% url 'account_logout' %}">Log out</a>
+						</li>
+						{% else %}
+						<li class="nav-item">
+							<a class="nav-link" href="{% url 'account_login' %}">Log in</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="{% url 'account_signup' %}">Sign up</a>
+						</li>
+						{% endif %}
+					</ul>
+				</div>
+			</div>
+		</nav>
 	</div>
 	{% block content %}
 	{% endblock content %}

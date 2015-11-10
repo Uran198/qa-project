@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<ul>
-{% for question in question_list %}
-	<li>
-		<a href="{% url 'questions:details' question.pk question.slug %}">{{ question.title }}</a>
-	</li>
-{% endfor %}
-</ul>
+<div class="conteiner">
+	<table class="table table-bordered">
+	{% for question in question_list %}
+		<tr><td>
+			<a href="{% url 'questions:details' question.pk question.slug %}">{{ question.title }}</a>
+		</td></tr>
+	{% endfor %}
+	</table>
+</div>
 {% endblock content %}

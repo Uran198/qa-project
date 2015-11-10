@@ -2,47 +2,62 @@
 
 {% block content %}
 
+<div class="conteiner">
 
-<h1>{{ question.title }}</h1>
-<h2>Current url {{ request.path }}</h2>
-<p>{{ question.details }}</p>
-<p>Owner: {{ question.owner }}</p>
+<div class="row">
+	<div class="col-xs-12">
+		<h1 class="text-center">{{ question.title }}</h1>
+	</div>
+</div>
 
-{% if user == question.owner %}
-
-<a href="{% url 'questions:update' question.pk %}"> Update</a>
-<br/>
-<br/>
-<form action="{% url 'questions:delete' question.pk %}" method="POST">
-	{% csrf_token %}
-	<input type="submit" value="Delete"/>
-</form>
-
-{% endif %}
-<ul>
-{% for comment in comments %}
-<li>
-	{{ comment }} :-- {{ comment.owner }}
-	{% if user == comment.owner %}
-	<form action="{% url 'questions:delete_comment' comment.pk %}" method="POST">
-		{% csrf_token %}
-		<input type="submit" value="delete" />
-	</form>
+<div class="row">
+	<div class="col-xs-9">
+		<p class="text-justify">{{ question.details }}</p>
+	</div>
+	{% if user == question.owner %}
+	<div class="col-xs-1 text-right">
+		<a class="btn" href="{% url 'questions:update' question.pk %}"> Update</a>
+		<form action="{% url 'questions:delete' question.pk %}" method="POST">
+			{% csrf_token %}
+			<input class="btn" type="submit" value="Delete"/>
+		</form>
+	</div>
 	{% endif %}
-</li>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<p class="text-right"><small>Owner: {{ question.owner }}</small></p>
+	</div>
+</div>
+
+{% for comment in comments %}
+	<div class="row">
+		<div class="col-xs-offset-1 col-xs-8">
+			<p class="text-left">{{ comment }} :-- {{ comment.owner }}</p>
+		</div>
+		{% if user == comment.owner %}
+		<div class="col-xs-3">
+			<form action="{% url 'questions:delete_comment' comment.pk %}" method="POST">
+				{% csrf_token %}
+				<input class="btn btn-sm" type="submit" value="delete" />
+			</form>
+		</div>
+		{% endif %}
+	</div>
 {% endfor %}
 
 {% if user.is_authenticated %}
-<li>
+<div class="row">
 	{# BAD HARDcODED FORM #}
+	<div class="col-xs-offset-1 col-xs-8">
 	<form action="{% url 'questions:add_question_comment' question.pk %}" method="POST">
 		{% csrf_token %}
 		<input type="textarea" name="text"/>
-		<input type="submit" value="Add comment"/>
+		<input class="btn btn-primary" type="submit" value="Add comment"/>
 	</form>
-</li>
+	</div>
+</div>
 {% endif %}
-</ul>
 
 <h2>Answers</h2>
 
@@ -88,6 +103,8 @@
 </form>
 
 {% endif %}
+</div>
 
 
+</div>
 {% endblock content %}
